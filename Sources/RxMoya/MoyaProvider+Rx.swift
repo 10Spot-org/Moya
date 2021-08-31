@@ -16,14 +16,7 @@ public extension Reactive where Base: MoyaProviderType {
     /// - Returns: Single response object.
     func request(_ token: Base.Target, callbackQueue: DispatchQueue? = nil) -> Single<Response> {
         return Single.create { [weak base] single in
-            let cancellableToken = base?.request(token, callbackQueue: callbackQueue, progress: nil) { result in
-                switch result {
-                case let .success(response):
-                    single(.success(response))
-                case let .failure(error):
-                    single(.failure(error))
-                }
-            }
+            let cancellableToken = base?.request(token, callbackQueue: callbackQueue, progress: nil) { single($0.mapError({ $0 as Error })) }
 
             return Disposables.create {
                 cancellableToken?.cancel()
